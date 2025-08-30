@@ -31,6 +31,65 @@ bool Seraph::FSM::AsASCIIFile(bool WriteHeightmap) {
 	return true;
 }
 
+bool Seraph::FSM::ExportTerrainCoordinates(std::string OutputPath) {
+	File out;
+	Assert(out.open(OutputPath, std::ios::out));
+	Assert(InMemory);
+	
+	out << "# Terrain Coordinates Export\n";
+	out << "# Format: X,Y,Z (Height)\n";
+	out << "# LayerID,X,Y,Height\n\n";
+	
+	for (int Layer{ 0 }; Layer < m_FSMHeader.HeightmapCount; Layer++) {
+		out << "# Layer " << Layer << " - Width: " << m_HeightMapHeader[Layer].Width 
+			<< ", Height: " << m_HeightMapHeader[Layer].Height 
+			<< ", Scale: " << m_HeightMapHeader[Layer].Scale << "\n";
+			
+		for (int Y{ 0 }; Y < m_HeightMapHeader[Layer].Height; Y++) {
+			for (int X{ 0 }; X < m_HeightMapHeader[Layer].Width; X++) {
+				int index = X + (Y * m_HeightMapHeader[Layer].Width);
+				float heightValue = HeightMap[Layer][index].HeightMap;
+				
+				// Aplicar escala se necessário
+				float scaledHeight = heightValue * m_HeightMapHeader[Layer].Scale;
+				
+				out << Layer << "," << X << "," << Y << "," << scaledHeight << "\n";
+			}
+		}
+		out << "\n"; // Linha em branco entre layers
+	}
+	
+	out.close();
+	return true;
+}
+
+bool Seraph::FSM::ExportObjectCoordinates(std::string OutputPath) {
+	File out;
+	Assert(out.open(OutputPath, std::ios::out));
+	Assert(InMemory);
+	
+	out << "# Object Coordinates Export\n";
+	out << "# Format: ObjectName,X,Y,Z,Rotation,Scale\n\n";
+	
+	for (int ObjectID{ 0 }; ObjectID < m_ObjectHeader.ObjectCount; ObjectID++) {
+		// Limpar o nome do objeto (remover caracteres nulos)
+		std::string objectName;
+		for (int i = 0; i < STRINGSZ && Object[ObjectID].Name[i] != '\0'; i++) {
+			objectName += Object[ObjectID].Name[i];
+		}
+		
+		out << objectName << ","
+			<< Object[ObjectID].X << ","
+			<< Object[ObjectID].Y << ","
+			<< Object[ObjectID].Z << ","
+			<< Object[ObjectID].Rotation << ","
+			<< Object[ObjectID].Scale << "\n";
+	}
+	
+	out.close();
+	return true;
+}
+
 bool Seraph::FSM::ImportHeightMapFromBMP(std::string FilePath, long HeightMapSlotID){ // CAUTION: THIS IS A DEMO AND PROBABLY HAVE FLAWS.
 	if (HeightMapSlotID >= m_FSMHeader.HeightmapCount)
 		return false;

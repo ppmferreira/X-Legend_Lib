@@ -68,6 +68,8 @@ namespace Seraph {
 		bool Load(std::string FilePath);
 		bool ExportHeightMapAsBMP(std::string FilePath);
 		bool AsASCIIFile(bool WriteHeightmap = false);
+		bool ExportTerrainCoordinates(std::string OutputPath);
+		bool ExportObjectCoordinates(std::string OutputPath);
 		bool ImportHeightMapFromBMP(std::string FilePath, long HeightMapSlotID);
 		bool ImportObject(float X, float Y, float Z, float Rotation, float Scale, const char* Name);
 		void Shutdown();
